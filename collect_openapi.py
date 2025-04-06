@@ -6,6 +6,7 @@ import json
 import subprocess
 import shutil
 import logging
+import sys
 from pathlib import Path
 import yaml
 from config import CONFIG
@@ -75,18 +76,31 @@ def fetch_openapi_spec(repo_name):
             "--jq", ".content"
         ]
         
-        encoded_content = run_gh_command(command)
+        content_response = run_gh_command(command).strip()
         
-        # Base64デコードが必要だが、ghコマンドの--jqオプションで.contentを指定しているため
-        # 追加の処理が必要かもしれない（実際の出力に依存）
+        # Base64デコード処理
         import base64
+        content = ""
         
         try:
-            content = base64.b64decode(encoded_content).decode('utf-8')
-        except:
-            # すでにデコードされている可能性もあるため、エラー時は元の内容を使用
-            logger.warning("Base64デコードに失敗しました。元の内容を使用します。")
-            content = encoded_content
+            # Base64デコードを試みる
+            # 引用符が含まれている場合は除去
+            if content_response.startswith('"') and content_response.endswith('"'):
+                content_response = content_response[1:-1]
+            
+            # エスケープされた文字を処理
+            cleaned_content = content_response.replace('\\n', '').replace('\\', '')
+            
+            # Base64デコード
+            content = base64.b64decode(cleaned_content).decode('utf-8')
+            logger.debug(f"Base64デコードに成功しました: {len(content)} バイト")
+        except Exception as e:
+            logger.warning(f"Base64デコードに失敗しました: {e}. そのまま処理を続行します")
+            content = content_response
+        
+        # 内容が空でないか確認
+        if not content.strip():
+            logger.warning(f"取得したコンテンツが空です: {repo_name}")
         
         # ファイルに保存
         output_file = repo_output_dir / Path(spec_path).name
@@ -250,14 +264,46 @@ def generate_static_site():
     logger.info(f"静的サイトが {static_site_dir} に生成されました")
     return len(specs)
 
+def clean_directories():
+    """
+    出力ディレクトリと静的サイトディレクトリをクリーンアップする共通機能
+    """
+    output_dir = Path(CONFIG["output_dir"])
+    static_site_dir = Path(CONFIG["static_site_dir"])
+    
+    if output_dir.exists():
+        logger.info(f"出力ディレクトリを削除: {output_dir}")
+        shutil.rmtree(output_dir)
+    
+    if static_site_dir.exists():
+        logger.info(f"静的サイトディレクトリを削除: {static_site_dir}")
+        shutil.rmtree(static_site_dir)
+    
+    return output_dir, static_site_dir
+
+def clean():
+    """
+    出力ディレクトリと静的サイトディレクトリをクリーンアップする
+    """
+    logger.info("クリーンアップを実行します")
+    clean_directories()
+    logger.info("クリーンアップが完了しました")
+
 def main():
     """
     メイン処理
     """
+    # コマンドライン引数の処理
+    if len(sys.argv) > 1:
+        command = sys.argv[1]
+        if command == "clean":
+            clean()
+            return
+    
     logger.info("OpenAPI仕様書収集を開始します")
     
     # 出力ディレクトリを作成
-    output_dir = Path(CONFIG["output_dir"])
+    output_dir, _ = clean_directories()
     output_dir.mkdir(exist_ok=True)
     
     # API関連リポジトリの一覧を取得
