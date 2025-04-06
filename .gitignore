@@ -42,7 +42,6 @@ static_site/
 
 # IDEの設定ファイル
 .idea/
-.vscode/
 *.swp
 *.swo
 .DS_Store

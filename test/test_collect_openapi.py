@@ -43,13 +43,13 @@ def simple_mock_gh_command(command):
         # 単純な文字列比較でリポジトリを判断
         if "xxx-api-1" in api_path:
             print("[MOCK] Matched xxx-api-1")
-            mock_file = Path("./test/mock_data/xxx-api-1/docs/openapi.yml")
+            mock_file = Path("test/mock_data/xxx-api-1/docs/openapi.yml")
         elif "xxx-api-2" in api_path:
             print("[MOCK] Matched xxx-api-2")
-            mock_file = Path("./test/mock_data/xxx-api-2/docs/openapi.yml")
+            mock_file = Path("test/mock_data/xxx-api-2/docs/openapi.yml")
         elif "xxx-api-3" in api_path:
             print("[MOCK] Matched xxx-api-3")
-            mock_file = Path("./test/mock_data/xxx-api-3/docs/openapi.yml")
+            mock_file = Path("test/mock_data/xxx-api-3/docs/openapi.yml")
         
         print(f"[MOCK] Looking for file: {mock_file}")
         
@@ -93,18 +93,13 @@ def clean_test_directories():
     """
     テスト用の出力ディレクトリをクリーンアップする共通機能
     """
-    test_output_dir = Path("test/output")
-    test_static_site_dir = Path("test/static_site")
-    
-    if test_output_dir.exists():
-        logger.info(f"テスト出力ディレクトリを削除: {test_output_dir}")
-        shutil.rmtree(test_output_dir)
+    test_static_site_dir = Path("static_site")
     
     if test_static_site_dir.exists():
         logger.info(f"テスト静的サイトディレクトリを削除: {test_static_site_dir}")
         shutil.rmtree(test_static_site_dir)
     
-    return test_output_dir, test_static_site_dir
+    return test_static_site_dir
 
 def clean_test_environment():
     """
@@ -137,26 +132,22 @@ def setup_test_environment():
     logger.info("テスト環境をセットアップします")
     
     # 共通クリーンアップ機能を呼び出し
-    test_output_dir, test_static_site_dir = clean_test_directories()
+    test_static_site_dir = clean_test_directories()
     
     # ディレクトリを作成
-    test_output_dir.mkdir(exist_ok=True)
     test_static_site_dir.mkdir(exist_ok=True)
     
     # 一時的に設定を書き換え
-    global original_output_dir, original_static_site_dir
-    original_output_dir = CONFIG["output_dir"]
+    global original_static_site_dir
     original_static_site_dir = CONFIG["static_site_dir"]
     
     # テスト用のパスに変更
-    CONFIG["output_dir"] = str(test_output_dir)
     CONFIG["static_site_dir"] = str(test_static_site_dir)
 
 def restore_config():
     """
     元の設定を復元する
     """
-    CONFIG["output_dir"] = original_output_dir
     CONFIG["static_site_dir"] = original_static_site_dir
 
 def run_test():
@@ -176,27 +167,41 @@ def run_test():
         collect_openapi.main()
         
         # 結果を確認
-        test_output_dir = Path(CONFIG["output_dir"])
         test_static_site_dir = Path(CONFIG["static_site_dir"])
         
-        if test_output_dir.exists() and test_static_site_dir.exists():
-            logger.info("テスト成功: 出力ディレクトリとサイトが生成されました")
+        if test_static_site_dir.exists():
+            logger.info("テスト成功: 静的サイトが生成されました")
+            
+            # 必須ファイルの存在を確認
+            required_files = [
+                "index.html",
+                "swagger-ui.html",
+                "redoc.html",
+                "api-spec-viewer.html",
+                "xxx-api-1/openapi.yml",
+                "xxx-api-2/openapi.yml",
+                "xxx-api-3/openapi.yml"
+            ]
             
             # 作成されたファイル一覧を表示
-            logger.info("--- 出力ディレクトリの内容 ---")
-            for item in test_output_dir.glob("**/*"):
-                if item.is_file():
-                    logger.info(f"  {item.relative_to(test_output_dir)}")
-            
             logger.info("--- 静的サイトディレクトリの内容 ---")
-            for item in test_static_site_dir.glob("**/*"):
-                if item.is_file():
-                    logger.info(f"  {item.relative_to(test_static_site_dir)}")
+            missing_files = []
+            for required_file in required_files:
+                file_path = test_static_site_dir / required_file
+                if file_path.exists():
+                    logger.info(f"  {required_file}")
+                else:
+                    missing_files.append(required_file)
+                    logger.error(f"  {required_file} - 見つかりません")
             
-            logger.info(f"テスト出力は {test_output_dir} と {test_static_site_dir} に保存されています")
+            if missing_files:
+                logger.error(f"必須ファイルが {len(missing_files)} 個見つかりませんでした")
+                return False
+            
+            logger.info(f"テスト出力は {test_static_site_dir} に保存されています")
             return True
         else:
-            logger.error("テスト失敗: 出力ディレクトリまたはサイトが生成されませんでした")
+            logger.error("テスト失敗: 静的サイトが生成されませんでした")
             return False
     
     finally:

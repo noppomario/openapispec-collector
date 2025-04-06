@@ -1,53 +1,6 @@
 # OpenAPI仕様書収集ツール
 
-GitHub上の複数リポジトリからOpenAPI仕様書を抽出し、静的サイトを生成するためのツールです。
-
-## 概要
-
-このツールは以下の機能を提供します：
-
-1. GitHub上の指定された組織/ユーザーのリポジトリから特定のパターン（例：「xxx-api」）に一致するリポジトリを検索
-2. 各リポジトリの特定パス（デフォルト：`docs/openapi.yml`）からOpenAPI仕様書を抽出
-3. 抽出した仕様書を基に、SwaggerUIとReDocによる閲覧が可能な静的サイトを生成
-
-## 必要要件
-
-- Python 3.8以上
-- GitHub CLI（`gh`コマンド）がインストールされ、認証済みであること
-
-## インストール
-
-```bash
-# リポジトリのクローン
-git clone https://github.com/noppomario/openapispec-collector.git
-cd openapispec-collector
-
-# 仮想環境の作成とアクティベーション
-python -m venv .venv
-source .venv/bin/activate  # Windowsの場合は .venv\Scripts\activate
-
-# 依存パッケージのインストール
-pip install -r requirements.txt
-```
-
-## 設定
-
-`config.py` ファイルを編集して、以下の設定を行います：
-
-```python
-CONFIG = {
-    # GitHubの組織名または所有者名
-    "organization": "your-organization",
-    
-    # 対象リポジトリのパターン
-    "repo_pattern": "api",
-    
-    # OpenAPI仕様書の相対パス
-    "spec_path": "docs/openapi.yml",
-    
-    # その他の設定...
-}
-```
+GitHub上の複数リポジトリに分散したOpenAPI仕様書を収集し、一元的に閲覧できる静的サイトを生成するツール
 
 ## 使用方法
 
@@ -59,21 +12,54 @@ python collect_openapi.py
 実行すると以下の処理が行われます：
 
 1. 指定された組織/ユーザーから対象のリポジトリを検索
-2. 各リポジトリからOpenAPI仕様書を取得し、`output/`ディレクトリに保存
-3. 静的サイトを`static_site/`ディレクトリに生成
+2. 各リポジトリからOpenAPI仕様書を取得し、`static_site/`ディレクトリに静的サイトを生成
+3. オフライン対応のSPAも同時に生成 (`static_site/offline-spa.html`)
 
 生成された静的サイトは、`static_site/index.html`を開くことで閲覧できます。
+また、`static_site/offline-spa.html`を開くことで、オフラインでも利用可能なシングルページアプリケーション版を利用できます。
 
-## テスト
+## 閲覧方法
 
-このプロジェクトにはテスト環境が含まれています。テストを実行するには：
+生成された静的サイトでは、以下の2つのビューアーを利用できます：
 
-```bash
-# テスト実行
-python -m test.test_collect_openapi
+- Swagger UI: OpenAPI仕様書の対話的なドキュメントを表示
+- ReDoc: 読みやすく整形されたドキュメントを表示
+
+オフラインSPA版では以下の機能も利用できます：
+
+- 全API横断検索
+- レスポンシブデザイン
+- オフライン対応（すべてのリソースを1ファイルに統合）
+
+## 設定
+
+`config.py`で以下の設定を変更できます：
+
+```python
+CONFIG = {
+    # GitHubの組織名または所有者名
+    "organization": "xxx-project",
+    
+    # 対象リポジトリのパターン
+    "repo_pattern": "xxx-api",
+    
+    # 取得するリポジトリの上限
+    "repo_limit": 100,
+    
+    # OpenAPI仕様書の相対パス
+    "spec_path": "docs/openapi.yml",
+    
+    # 静的サイトの出力先ディレクトリ
+    "static_site_dir": "static_site",
+}
 ```
 
-テスト環境では、GitHubリポジトリへの実際のアクセスをシミュレートするモックが使用されます。テスト結果は`test/output/`と`test/static_site/`ディレクトリに出力されます。
+## コマンドライン引数
+
+以下のコマンドライン引数が利用可能です：
+
+- `clean`: 出力ディレクトリをクリーンアップ
+- `spa`: オフラインSPAのみを生成
 
 ## ライセンス
 

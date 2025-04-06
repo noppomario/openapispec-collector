@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}OpenAPI仕様書コレクション{% endblock %}
+
+{% block sidebar_content %}
+<div class="list-group mt-4">
+{% for spec in specs %}
+    <div class="api-list-item">
+        <h5>{{ spec.title }}</h5>
+        <p class="mb-2">Repository: {{ spec.repo }}</p>
+        <div class="d-flex gap-2">
+            <a href="{{ spec.swagger_link }}" class="btn btn-primary btn-sm" target="_blank">Swagger UI</a>
+            <a href="{{ spec.redoc_link }}" class="btn btn-success btn-sm" target="_blank">ReDoc</a>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block main_content %}
+<div class="container mt-5 text-center">
+    <h1>OpenAPI仕様書コレクション</h1>
+    <p>左側のメニューから表示したい仕様書を選択してください</p>
+</div>
+{% endblock %}

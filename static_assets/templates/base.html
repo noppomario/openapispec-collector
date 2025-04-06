@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OpenAPI仕様書コレクション{% endblock %}</title>
+    
+    {% block styles %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        /* 共通スタイル */
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            overflow-y: auto;
+            border-right: 1px solid #dee2e6;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .content {
+            flex-grow: 1;
+            padding: 0;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .api-list-item {
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid transparent;
+            padding: 15px;
+            margin-bottom: 8px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .api-list-item:hover {
+            border-left-color: #007bff;
+            background-color: #f8f9fa;
+            transform: translateX(2px);
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 30vh;
+            }
+        }
+    </style>
+    {% endblock styles %}
+    {% block additional_styles %}{% endblock additional_styles %}
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <h2>OpenAPI仕様書</h2>
+            {% block sidebar_content %}{% endblock sidebar_content %}
+        </div>
+        <div class="content">
+            {% block main_content %}{% endblock main_content %}
+        </div>
+    </div>
+    {% block scripts %}{% endblock scripts %}
+</body>
+</html>

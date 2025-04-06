@@ -1,0 +1,29 @@
+{
+    // Jinja2テンプレートファイルの関連付け
+    "files.associations": {
+        "**/templates/*.html": "jinja-html",
+        "**/static_assets/templates/*.html": "jinja-html"
+    },
+    
+    // HTMLファイル内のJinja2構文検証を無効化
+    "html.validate.scripts": false,
+    "html.validate.styles": false,
+    
+    // Jinja2テンプレートの構文ハイライト設定
+    "emmet.includeLanguages": {
+        "jinja-html": "html"
+    },
+    
+    // Jinja2テンプレート内のコメントのシンタックスハイライト
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "comment.block.jinja",
+                "settings": {
+                    "foreground": "#6A9955",
+                    "fontStyle": "italic"
+                }
+            }
+        ]
+    }
+}

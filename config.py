@@ -14,9 +14,6 @@ CONFIG = {
     # OpenAPI仕様書の相対パス
     "spec_path": "docs/openapi.yml",
     
-    # 抽出したファイルの出力先ディレクトリ
-    "output_dir": "output",
-    
     # 静的サイトの出力先ディレクトリ
     "static_site_dir": "static_site",
 }

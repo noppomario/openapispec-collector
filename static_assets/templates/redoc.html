@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ReDoc - OpenAPI Viewer</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: auto;
+        }
+        #redoc-container {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="redoc-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+    <script>
+        // 親ウィンドウからのメッセージを受信
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'RENDER_SPEC') {
+                try {
+                    // すでにRedocが初期化されている場合は破棄
+                    const container = document.getElementById('redoc-container');
+                    while (container.firstChild) {
+                        container.removeChild(container.firstChild);
+                    }
+                    
+                    // 新しいRedocインスタンスを初期化
+                    Redoc.init(
+                        event.data.spec,
+                        {
+                            scrollYOffset: 0,
+                            hideDownloadButton: true,
+                            nativeScrollbars: true,
+                            hideLoading: false,
+                            suppressWarnings: true
+                        },
+                        container
+                    );
+                    // 親フレームにレンダリング完了を通知
+                    window.parent.postMessage({ type: 'RENDER_COMPLETE' }, '*');
+                } catch (error) {
+                    console.error('ReDoc初期化エラー:', error);
+                    document.getElementById('redoc-container').innerHTML = `
+                        <div style="padding: 20px; color: red;">
+                            <h3>エラーが発生しました</h3>
+                            <p>${error.message || '不明なエラー'}</p>
+                        </div>
+                    `;
+                    // 親フレームにエラーを通知
+                    window.parent.postMessage({ type: 'RENDER_ERROR', error: error.message }, '*');
+                }
+            }
+        });
+        
+        // 初期化完了を親に通知
+        window.parent.postMessage({ type: 'FRAME_READY' }, '*');
+    </script>
+</body>
+</html>

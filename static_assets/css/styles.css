@@ -1,0 +1,348 @@
+/**
+ * OpenAPI仕様書ビューア用スタイル
+ */
+
+/* 基本レイアウト */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+}
+
+.sidebar {
+    width: 300px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    overflow-y: auto;
+    border-right: 1px solid #dee2e6;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar > h2 {
+    margin-bottom: 1rem;
+}
+
+.content {
+    flex-grow: 1;
+    padding: 0;
+    overflow: hidden; /* スクロールをiframeに委ねる */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* flexboxのスクロール制御に必要 */
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex-grow: 1;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#viewer-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* flexboxのスクロール制御に必要 */
+}
+
+#swagger-ui {
+    height: 100%;
+    overflow-y: auto;
+}
+
+#redoc-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex-grow: 1;
+    display: block;
+    min-height: 0; /* flexboxのスクロール制御に必要 */
+}
+
+/* ローディング表示 */
+.loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+/* ビューアヘッダ */
+.viewer-header {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.back-button {
+    padding: 5px 10px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.spec-title {
+    margin: 0 10px;
+    font-size: 1.2em;
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* 検索機能 */
+.search-container {
+    margin-bottom: 1rem;
+    position: relative;
+    flex-shrink: 0;
+}
+
+#global-search {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-results {
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* 検索インジケータ */
+.search-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    align-items: center;
+    background-color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.search-indicator .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* サイドバータブ */
+.sidebar-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sidebar-tab {
+    padding: 8px 15px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.sidebar-tab.active {
+    border: 1px solid #dee2e6;
+    border-bottom-color: #f8f9fa;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: -1px;
+    background-color: #f8f9fa;
+}
+
+#api-list-container, #search-results-container {
+    display: none;
+    flex-grow: 1;
+    overflow-y: auto;
+    height: 0; /* flexboxで正しく高さを制御するため追加 */
+}
+
+#api-list-container.active, #search-results-container.active {
+    display: block;
+    height: auto; /* アクティブな時は高さを自動に */
+}
+
+#api-list {
+    max-height: calc(100vh - 150px); /* ヘッダーと検索ボックスの高さを考慮 */
+    overflow-y: auto;
+}
+
+.highlight {
+    background-color: #fff3cd;
+    padding: 0.1em 0.2em;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+/* 検索結果アイテム */
+.search-result-item {
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-result-item:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: #f8f9fa;
+}
+
+.result-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.result-description {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.result-section-title {
+    font-size: 12px;
+    margin: 8px 0 5px 0;
+    color: #495057;
+    font-weight: bold;
+}
+
+.result-endpoint {
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.result-endpoint code {
+    margin-left: 5px;
+    font-size: 13px;
+    color: #333;
+    word-break: break-all;
+}
+
+.result-snippet {
+    font-size: 12px;
+    color: #666;
+    margin: 3px 0 8px 0;
+    padding-left: 10px;
+    border-left: 2px solid #eee;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.result-path {
+    color: #6c757d;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.result-schema, .result-content {
+    margin-bottom: 8px;
+}
+
+.operation-item {
+    padding-left: 10px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.operation-item .badge {
+    margin-right: 5px;
+    font-size: 10px;
+    min-width: 45px;
+    text-align: center;
+}
+
+.more-matches {
+    font-size: 12px;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* API一覧アイテム */
+.api-list-item {
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+    padding: 15px;
+    margin-bottom: 8px;
+}
+
+.api-list-item:hover {
+    border-left-color: #007bff;
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.api-description {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.button-group {
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.api-list-item:hover .button-group {
+    opacity: 1;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        max-height: 30vh;
+    }
+
+    .api-list-item {
+        padding: 10px;
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 8px;
+        opacity: 1;
+    }
+    
+    .button-group .btn {
+        flex: 1;
+    }
+}
