@@ -2,24 +2,46 @@
 
 {% block title %}OpenAPI仕様書コレクション{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<!-- Swagger UI CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+<!-- カスタムスタイル -->
+<link rel="stylesheet" href="static/css/styles.css">
+{% endblock %}
+
 {% block sidebar_content %}
-<div class="list-group mt-4">
-{% for spec in specs %}
-    <div class="api-list-item">
-        <h5>{{ spec.title }}</h5>
-        <p class="mb-2">Repository: {{ spec.repo }}</p>
-        <div class="d-flex gap-2">
-            <a href="{{ spec.swagger_link }}" class="btn btn-primary btn-sm" target="_blank">Swagger UI</a>
-            <a href="{{ spec.redoc_link }}" class="btn btn-success btn-sm" target="_blank">ReDoc</a>
-        </div>
-    </div>
-{% endfor %}
-</div>
+{% include "includes/sidebar_content.html" %}
 {% endblock %}
 
 {% block main_content %}
-<div class="container mt-5 text-center">
-    <h1>OpenAPI仕様書コレクション</h1>
-    <p>左側のメニューから表示したい仕様書を選択してください</p>
-</div>
+{% include "includes/main_content.html" %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Swagger UI Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+
+<!-- ReDoc JS -->
+<script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+
+<!-- アプリケーションスクリプト直接埋め込み -->
+<script>
+    // API仕様データを初期化（Pythonテンプレートから渡される）
+    const apiSpecs = {
+        {% for spec in specs %}
+            "{{ spec.path }}": {{ spec.data|safe }},
+        {% endfor %}
+    };
+    
+    // 必要なテンプレートデータ
+    const redocTemplateBase64 = '{{ redoc_template_base64 }}';
+</script>
+
+<script>
+    // Pythonで読み込み済みの外部JSファイルをインラインで展開
+    {{ js_search|safe }}
+    {{ js_viewer|safe }}
+    {{ js_main|safe }}
+</script>
 {% endblock %}

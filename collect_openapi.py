@@ -110,14 +110,27 @@ def generate_static_site():
     
     logger.info("静的サイトの生成を開始します")
     
+    # 静的アセットのディレクトリを作成してCSSとJSファイルをコピー
+    static_css_dir = static_site_dir / "static" / "css"
+    static_css_dir.mkdir(exist_ok=True, parents=True)
+    
+    # CSSファイルをコピー
+    try:
+        shutil.copy2(CSS_DIR / "styles.css", static_css_dir / "styles.css")
+        logger.info(f"CSSファイルをコピーしました: {static_css_dir / 'styles.css'}")
+    except Exception as e:
+        logger.error(f"CSSファイルのコピー中にエラーが発生しました: {e}")
+    
     # index.htmlを生成
     env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
     template = env.get_template("index.html")
     
     # 収集したすべての仕様書をリスト化
     specs = []
+    api_specs = {}  # API仕様書データをJSONとして保持
+    
     for repo_dir in static_site_dir.iterdir():
-        if repo_dir.is_dir():
+        if repo_dir.is_dir() and repo_dir.name != "static":  # staticディレクトリは除外
             yml_files = list(repo_dir.glob("*.yml"))
             yaml_files = list(repo_dir.glob("*.yaml"))
             spec_files = yml_files + yaml_files
@@ -128,11 +141,17 @@ def generate_static_site():
                 
                 # APIのタイトルを抽出
                 title = repo_name
+                spec_data = None
+                
                 try:
                     with open(spec_file, 'r', encoding='utf-8') as f:
-                        spec_data = yaml.safe_load(f)
+                        content = f.read()
+                        spec_data = yaml.safe_load(content)
                         if spec_data and 'info' in spec_data and 'title' in spec_data['info']:
                             title = spec_data['info']['title']
+                        
+                        # API仕様データをJSONとして保持
+                        api_specs[spec_path] = spec_data
                 except Exception as e:
                     logger.warning(f"{spec_file}からタイトル情報を抽出できませんでした: {e}")
                 
@@ -144,12 +163,66 @@ def generate_static_site():
                     "title": title,
                     "repo": repo_name,
                     "path": spec_path,
+                    "data": json.dumps(spec_data),  # APIの仕様データをJSON文字列として含める
                     "swagger_link": swagger_link,
                     "redoc_link": redoc_link
                 })
     
+    # ReDocテンプレートを読み込みBase64エンコード
+    redoc_template_path = TEMPLATES_DIR / "redoc.html"
+    redoc_template_base64 = ""
+    try:
+        with open(redoc_template_path, 'r', encoding='utf-8') as f:
+            redoc_template = f.read()
+            redoc_template_base64 = base64.b64encode(redoc_template.encode('utf-8')).decode('utf-8')
+    except Exception as e:
+        logger.error(f"ReDocテンプレート読み込み中にエラーが発生: {e}")
+
+    # Swagger UI CSSを読み込む
+    swagger_ui_css = ""
+    try:
+        swagger_ui_css_url = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css"
+        response = requests.get(swagger_ui_css_url)
+        if response.status_code == 200:
+            swagger_ui_css = response.text
+    except Exception as e:
+        logger.warning(f"Swagger UI CSSの読み込みに失敗しました: {e}")
+    
+    # カスタムCSSを読み込む
+    custom_css = ""
+    try:
+        css_path = CSS_DIR / "styles.css"
+        with open(css_path, 'r', encoding='utf-8') as f:
+            custom_css = f.read()
+    except Exception as e:
+        logger.warning(f"カスタムCSSの読み込みに失敗しました: {e}")
+    
+    # JavaScriptファイルを読み込む
+    js_content = {}
+    js_files = {
+        "js_search": JS_DIR / "search.js", 
+        "js_viewer": JS_DIR / "viewer.js", 
+        "js_main": JS_DIR / "main.js"
+    }
+    
+    for name, file_path in js_files.items():
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                js_content[name] = f.read()
+                logger.info(f"JavaScriptファイルを読み込みました: {name} ({len(js_content[name])} バイト)")
+        except Exception as e:
+            logger.error(f"JavaScriptファイルの読み込み中にエラーが発生しました: {file_path}, エラー: {e}")
+            js_content[name] = f"/* Error loading: {file_path}, {str(e)} */"
+    
     # index.htmlを保存
-    rendered_html = template.render(specs=specs)
+    rendered_html = template.render(
+        specs=specs,
+        redoc_template_base64=redoc_template_base64,
+        swagger_ui_css=swagger_ui_css,
+        custom_css=custom_css,
+        **js_content  # JavaScriptコンテンツを展開
+    )
+    
     with open(static_site_dir / "index.html", "w", encoding='utf-8') as f:
         f.write(rendered_html)
     
@@ -219,7 +292,6 @@ def generate_integrated_viewer():
         # すべてのCSS/JSコンテンツを読み込む
         # 1. 外部リソース（CDN）から取得
         external_resources = {
-            "bootstrap_css": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
             "swagger_ui_css": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
             "swagger_ui_js": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
             "redoc_js": "https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"

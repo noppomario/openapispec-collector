@@ -13,10 +13,10 @@ python collect_openapi.py
 
 1. 指定された組織/ユーザーから対象のリポジトリを検索
 2. 各リポジトリからOpenAPI仕様書を取得し、`static_site/`ディレクトリに静的サイトを生成
-3. オフライン対応のSPAも同時に生成 (`static_site/offline-spa.html`)
+3. スタンドアローン版のビューアーも同時に生成 (`static_site/api-spec-viewer.html`)
 
 生成された静的サイトは、`static_site/index.html`を開くことで閲覧できます。
-また、`static_site/offline-spa.html`を開くことで、オフラインでも利用可能なシングルページアプリケーション版を利用できます。
+また、`static_site/api-spec-viewer.html`を開くことで、オフラインでも利用可能なスタンドアローン版を利用できます。
 
 ## 閲覧方法
 
@@ -25,11 +25,16 @@ python collect_openapi.py
 - Swagger UI: OpenAPI仕様書の対話的なドキュメントを表示
 - ReDoc: 読みやすく整形されたドキュメントを表示
 
-オフラインSPA版では以下の機能も利用できます：
+スタンドアローン版では以下の機能も利用できます：
 
 - 全API横断検索
 - レスポンシブデザイン
 - オフライン対応（すべてのリソースを1ファイルに統合）
+
+## ファイルの違い
+
+- `index.html`: 基本となるビューアー（外部リソースを参照）
+- `api-spec-viewer.html`: すべてのリソースを1ファイルにバンドルしたスタンドアローン版
 
 ## 設定
 
@@ -59,7 +64,20 @@ CONFIG = {
 以下のコマンドライン引数が利用可能です：
 
 - `clean`: 出力ディレクトリをクリーンアップ
-- `spa`: オフラインSPAのみを生成
+- `viewer`: スタンドアローン版ビューアーのみを生成
+
+## テスト
+
+このプロジェクトにはテスト環境が含まれています。テストを実行するには：
+
+```bash
+# テスト実行
+python -m test.test_collect_openapi
+
+# サーバ起動
+cd static_site
+python -m http.server 8000
+```
 
 ## ライセンス
 

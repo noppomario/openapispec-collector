@@ -2,119 +2,23 @@
 
 {% block title %}OpenAPI仕様書コレクション - 統合ビューア{% endblock %}
 
-{% block additional_styles %}
+{% block styles %}
+{{ super() }}
 <style>
     /* Swagger UI CSS */
     {{ swagger_ui_css|safe }}
     
-    /* カスタムCSS */
-    .sidebar-tabs {
-        display: flex;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .sidebar-tab {
-        padding: 8px 15px;
-        cursor: pointer;
-        border: 1px solid transparent;
-    }
-    
-    .sidebar-tab.active {
-        border: 1px solid #dee2e6;
-        border-bottom-color: #f8f9fa;
-        border-radius: 4px 4px 0 0;
-        margin-bottom: -1px;
-        background-color: #f8f9fa;
-    }
-    
-    .search-container {
-        margin-bottom: 1rem;
-        position: relative;
-        flex-shrink: 0;
-    }
-    
-    #global-search {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-    
-    .viewer-header {
-        padding: 10px;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .back-button {
-        padding: 5px 10px;
-        background-color: #6c757d;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    
-    .spec-title {
-        margin: 0 10px;
-        font-size: 1.2em;
-        flex-grow: 1;
-        text-align: center;
-    }
-    
-    .hidden {
-        display: none !important;
-    }
-    
+    /* カスタムスタイル - styles.cssの内容と同等 */
     {{ custom_css|safe }}
 </style>
 {% endblock %}
 
 {% block sidebar_content %}
-<div class="sidebar-tabs">
-    <div class="sidebar-tab active" id="tab-apis">API一覧</div>
-    <div class="sidebar-tab" id="tab-search">検索結果</div>
-</div>
-<div class="search-container">
-    <input type="text" id="global-search" placeholder="全API横断検索..." />
-</div>
-<div id="api-list-container" class="active">
-    <div class="list-group" id="api-list">
-        <!-- APIリストはJavaScriptで動的に生成 -->
-    </div>
-</div>
-<div id="search-results-container">
-    <div class="search-results" id="search-results">
-        <!-- 検索結果がここに表示されます -->
-    </div>
-</div>
+{% include "includes/sidebar_content.html" %}
 {% endblock %}
 
 {% block main_content %}
-<div id="welcome-screen">
-    <div class="container mt-5 text-center">
-        <h1>OpenAPI仕様書コレクション</h1>
-        <p>左側のリストから表示したい仕様書を選択してください</p>
-        <p>または、検索ボックスで全API横断検索を実行できます</p>
-    </div>
-</div>
-<div id="viewer-container" class="hidden">
-    <div class="viewer-header">
-        <button class="back-button" id="back-to-list">戻る</button>
-        <div class="spec-title" id="current-spec-title">仕様書タイトル</div>
-        <div class="viewer-type" id="current-viewer-type">Viewer: -</div>
-    </div>
-    <!-- SwaggerUIコンテナ -->
-    <div id="swagger-ui" class="hidden"></div>
-    <!-- ReDocはiframeで表示 -->
-    <iframe id="redoc-frame" class="hidden" title="ReDoc Viewer" sandbox="allow-scripts allow-same-origin">
-    </iframe>
-</div>
+{% include "includes/main_content.html" %}
 {% endblock %}
 
 {% block scripts %}

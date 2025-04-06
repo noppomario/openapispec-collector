@@ -2,7 +2,8 @@
     // Jinja2テンプレートファイルの関連付け
     "files.associations": {
         "**/templates/*.html": "jinja-html",
-        "**/static_assets/templates/*.html": "jinja-html"
+        "**/static_assets/templates/*.html": "jinja-html",
+        "**/static_assets/templates/includes/*.html": "jinja-html"
     },
     
     // HTMLファイル内のJinja2構文検証を無効化

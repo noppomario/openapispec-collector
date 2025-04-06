@@ -1,0 +1,19 @@
+<div id="welcome-screen">
+    <div class="container mt-5 text-center">
+        <h1>OpenAPI仕様書コレクション</h1>
+        <p>左側のリストから表示したい仕様書を選択してください</p>
+        <p>または、検索ボックスで全API横断検索を実行できます</p>
+    </div>
+</div>
+<div id="viewer-container" class="hidden">
+    <div class="viewer-header">
+        <button class="back-button" id="back-to-list">戻る</button>
+        <div class="spec-title" id="current-spec-title">仕様書タイトル</div>
+        <div class="viewer-type" id="current-viewer-type">Viewer: -</div>
+    </div>
+    <!-- SwaggerUIコンテナ -->
+    <div id="swagger-ui" class="hidden"></div>
+    <!-- ReDocはiframeで表示 -->
+    <iframe id="redoc-frame" class="hidden" title="ReDoc Viewer" sandbox="allow-scripts allow-same-origin">
+    </iframe>
+</div>
