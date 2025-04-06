@@ -18,8 +18,8 @@ function showSpec(specPath, viewerType, title, apiSpecs) {
     const currentViewerType = document.getElementById('current-viewer-type');
     
     // タイトルと表示タイプを更新
-    currentSpecTitle.textContent = title || 'OpenAPI仕様書';
-    currentViewerType.textContent = `Viewer: ${viewerType === 'swagger' ? 'Swagger UI' : 'ReDoc'}`;
+    currentSpecTitle.textContent = title || 'API仕様書';
+    currentViewerType.textContent = `表示方法: ${viewerType === 'swagger' ? 'Swagger UI' : 'ReDoc'}`;
     
     // 基本的なUI表示制御
     welcomeScreen.classList.add('hidden');

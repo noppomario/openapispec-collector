@@ -346,3 +346,17 @@ iframe {
         flex: 1;
     }
 }
+
+/* ウェルカム画面のスタイル */
+.welcome-message h1 {
+    font-size: 2.2rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-text {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}

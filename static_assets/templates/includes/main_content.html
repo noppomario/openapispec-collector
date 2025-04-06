@@ -1,15 +1,17 @@
 <div id="welcome-screen">
-    <div class="container mt-5 text-center">
-        <h1>OpenAPI仕様書コレクション</h1>
-        <p>左側のリストから表示したい仕様書を選択してください</p>
-        <p>または、検索ボックスで全API横断検索を実行できます</p>
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="text-center welcome-message">
+            <h1 class="mb-4">API仕様書ビューア</h1>
+            <p class="text-secondary welcome-text">左側のリストから表示したいAPI仕様書を選択してください</p>
+            <p class="text-secondary welcome-text">または、検索ボックスでAPI横断検索を実行できます</p>
+        </div>
     </div>
 </div>
 <div id="viewer-container" class="hidden">
     <div class="viewer-header">
         <button class="back-button" id="back-to-list">戻る</button>
-        <div class="spec-title" id="current-spec-title">仕様書タイトル</div>
-        <div class="viewer-type" id="current-viewer-type">Viewer: -</div>
+        <div class="spec-title" id="current-spec-title">API仕様書</div>
+        <div class="viewer-type" id="current-viewer-type">表示方法: -</div>
     </div>
     <!-- SwaggerUIコンテナ -->
     <div id="swagger-ui" class="hidden"></div>
