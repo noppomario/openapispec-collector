@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 仮想環境
+.venv/
+venv/
+ENV/
+env/
+
+# テスト関連のファイル
+test/mock_data/
+test/output/
+test/static_site/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+
+# 実際のプログラム実行で生成されるディレクトリ
+output/
+static_site/
+
+# IDEの設定ファイル
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ログファイル
+*.log
