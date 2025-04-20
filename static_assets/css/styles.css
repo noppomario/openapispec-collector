@@ -304,3 +304,12 @@ html, body {
 .viewer-header .viewer-type {
     gap: 0.5em;
 }
+
+/* サイドバー非表示時、.contentを全幅に */
+.sidebar.hidden {
+    display: none !important;
+}
+
+.app-container.full-width .content {
+    width: 100% !important;
+}

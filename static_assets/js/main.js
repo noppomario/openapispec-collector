@@ -139,6 +139,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // サイドバートグルボタンのイベント設定
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    // メインコンテンツの親（app-container）取得
+    const appContainer = document.querySelector('.app-container');
+    // サイドバー再表示用のフローティングボタンをbody直下に生成
+    let sidebarShowBtn = document.getElementById('sidebar-show-btn');
+    if (!sidebarShowBtn) {
+        sidebarShowBtn = document.createElement('button');
+        sidebarShowBtn.id = 'sidebar-show-btn';
+        sidebarShowBtn.className = 'btn btn-primary btn-sm';
+        sidebarShowBtn.style.position = 'fixed';
+        sidebarShowBtn.style.top = '16px';
+        sidebarShowBtn.style.left = '12px';
+        sidebarShowBtn.style.zIndex = '2000';
+        sidebarShowBtn.style.display = 'none';
+        sidebarShowBtn.title = 'サイドバーを表示';
+        sidebarShowBtn.innerHTML = '<i class="bi bi-list"></i>';
+        document.body.appendChild(sidebarShowBtn);
+    }
+    if (sidebar && sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function() {
+            const isHidden = sidebar.classList.toggle('hidden');
+            if (appContainer) {
+                if (isHidden) {
+                    appContainer.classList.add('full-width');
+                    sidebarShowBtn.style.display = 'block';
+                } else {
+                    appContainer.classList.remove('full-width');
+                    sidebarShowBtn.style.display = 'none';
+                }
+            }
+        });
+    }
+    // サイドバー再表示ボタンのイベント
+    sidebarShowBtn.addEventListener('click', function() {
+        sidebar.classList.remove('hidden');
+        if (appContainer) appContainer.classList.remove('full-width');
+        sidebarShowBtn.style.display = 'none';
+    });
 });
 
 // APIリストを初期化
