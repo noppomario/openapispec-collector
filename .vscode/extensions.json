@@ -1,5 +1,6 @@
 {
   "recommendations": [
-    "samuelcolvin.jinjahtml" // Better Jinja - Jinja2テンプレートのサポート
+    "samuelcolvin.jinjahtml",
+    "ritwickdey.liveserver"
   ]
 }

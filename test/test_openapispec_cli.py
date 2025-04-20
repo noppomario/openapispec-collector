@@ -7,12 +7,16 @@ import shutil
 import logging
 from pathlib import Path
 
-# プロジェクトのルートディレクトリをパスに追加
+# src配下のモジュールをimportするよう修正
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# 元のモジュールをインポート
-from config import CONFIG
-import collect_openapi
+from src.config import CONFIG
+import src.gh_utils as gh_utils
+import src.site_generator as site_generator
+import src.cleaner as cleaner
+
+# collect_openapi.pyの代わりにCLIの関数を直接importする場合は、
+# openapispec_cli.pyのcollect_only/all_processなどをimportしてもよい
 
 # ロギング設定
 logging.basicConfig(
@@ -22,70 +26,49 @@ logging.basicConfig(
 logger = logging.getLogger('openapispec-test')
 
 def simple_mock_gh_command(command):
-    """
-    シンプル化したghコマンドのモック
-    完全にハードコードした応答を返すようにする
-    """
     print(f"[MOCK] Command: {command}")
-    
     # リポジトリ一覧を取得
     if command[0:3] == ["gh", "repo", "list"]:
-        return """[{"name":"xxx-api-1"},{"name":"xxx-api-2"},{"name":"xxx-api-3"},{"name":"other-repo-1"},{"name":"another-project"}]"""
-    
-    # ファイル内容を取得
-    elif command[0:2] == ["gh", "api"]:
-        api_path = command[2]
-        print(f"[MOCK] API path: {api_path}")
-        
-        # 対応するファイルを直接読み込む
-        mock_file = None
-        
-        # 単純な文字列比較でリポジトリを判断
-        if "xxx-api-1" in api_path:
-            print("[MOCK] Matched xxx-api-1")
-            mock_file = Path("test/mock_data/xxx-api-1/docs/openapi.yml")
-        elif "xxx-api-2" in api_path:
-            print("[MOCK] Matched xxx-api-2")
-            mock_file = Path("test/mock_data/xxx-api-2/docs/openapi.yml")
-        elif "xxx-api-3" in api_path:
-            print("[MOCK] Matched xxx-api-3")
-            mock_file = Path("test/mock_data/xxx-api-3/docs/openapi.yml")
-        
-        print(f"[MOCK] Looking for file: {mock_file}")
-        
-        if mock_file and mock_file.exists():
-            print(f"[MOCK] File found: {mock_file}")
-            
-            # ファイルパスを絶対パスに変換して確実に読み込む
-            with open(mock_file.absolute(), "r") as f:
-                content = f.read()
-                
-            print(f"[MOCK] File content size: {len(content)} bytes")
-            print(f"[MOCK] File content preview: {content[:50]}")
-            
-            # --jq オプションのチェック - .content を抽出する場合はBase64エンコード
-            if "--jq" in command and command[command.index("--jq") + 1] == ".content":
-                import base64
-                encoded_content = base64.b64encode(content.encode()).decode()
-                print(f"[MOCK] Base64 encoded content size: {len(encoded_content)} bytes")
-                print(f"[MOCK] Returning encoded content: {encoded_content[:50]}...")
-                return encoded_content
-            
-            # 完全なJSONレスポンスを作成
-            import json
-            import base64
-            
-            response = {
-                "name": "openapi.yml",
-                "path": "docs/openapi.yml",
-                "content": base64.b64encode(content.encode()).decode(),
-                "encoding": "base64"
-            }
-            
-            return json.dumps(response)
+        return """[{\"name\":\"xxx-api-1\"},{\"name\":\"xxx-api-2\"},{\"name\":\"xxx-api-3\"},{\"name\":\"other-repo-1\"},{\"name\":\"another-project\"}]"""
+    # パターン付きYAML一覧取得
+    elif command[0:2] == ["gh", "api"] and "/contents/docs/paths" in command[2] and "--jq" in command and "/contents/docs/paths/" not in command[2]:
+        import re
+        jq_arg = command[command.index("--jq") + 1]
+        import re as _re
+        m = _re.search(r'test\\?\("(.*?)\\?"\)', jq_arg)
+        if m:
+            regex = m.group(1)
         else:
-            print(f"[MOCK] File not found: {mock_file}")
-    
+            regex = None
+        files = ["openapi.yml", "subapi.yml"]
+        if regex:
+            files = [f for f in files if re.match(regex, f)]
+        print(f"[MOCK] Returning file list for {command[2]}: {files}")
+        return "\n".join(files)
+    # docs/paths配下のYAMLファイル内容取得
+    elif command[0:2] == ["gh", "api"] and "/contents/docs/paths/" in command[2] and "--jq" in command and command[-1] == ".content":
+        import base64
+        api_path = command[2]
+        repo = None
+        yml = None
+        for r in ["xxx-api-1", "xxx-api-2", "xxx-api-3"]:
+            if r in api_path:
+                repo = r
+        if repo:
+            yml = api_path.split("/contents/docs/paths/")[-1]
+            mock_file = Path(f"test/mock_data/{repo}/docs/paths/{yml}")
+            print(f"[MOCK] Looking for file: {mock_file} (abs: {mock_file.absolute()}) exists={mock_file.exists()}")
+            if mock_file.exists():
+                with open(mock_file, "r") as f:
+                    content = f.read()
+                encoded_content = base64.b64encode(content.encode()).decode()
+                print(f"[MOCK] Returning base64 for {mock_file}: {encoded_content[:60]} ...")
+                return encoded_content
+            else:
+                print(f"[MOCK] File not found for base64: {mock_file}")
+                return ""
+        return ""
+
     print(f"[MOCK] No matching response found, returning empty object")
     return "{}"
 
@@ -151,24 +134,25 @@ def restore_config():
     CONFIG["static_site_dir"] = original_static_site_dir
 
 def run_test():
-    """
-    テストを実行
-    """
     logger.info("テスト環境をセットアップします")
     setup_test_environment()
-    
-    # 元のスクリプトの実行関数をモック関数で置き換え
-    original_run_gh_command = collect_openapi.run_gh_command
-    collect_openapi.run_gh_command = simple_mock_gh_command
-    
+    original_run_gh_command = gh_utils.run_gh_command
+    gh_utils.run_gh_command = simple_mock_gh_command
     try:
-        # スクリプトを実行
         logger.info("OpenAPI仕様書収集スクリプトを実行します")
-        collect_openapi.main()
+        test_static_site_dir = Path(CONFIG["static_site_dir"])
+        test_static_site_dir.mkdir(exist_ok=True)
+        api_repos = gh_utils.get_api_repositories()
+        successful_specs = 0
+        for repo in api_repos:
+            output_files = gh_utils.fetch_openapi_specs(repo)
+            if output_files:
+                successful_specs += len(output_files)
+        if successful_specs > 0:
+            site_generator.generate_static_site()
+            site_generator.generate_integrated_viewer()
         
         # 結果を確認
-        test_static_site_dir = Path(CONFIG["static_site_dir"])
-        
         if test_static_site_dir.exists():
             logger.info("テスト成功: 静的サイトが生成されました")
             
@@ -178,9 +162,12 @@ def run_test():
                 "swagger-ui.html",
                 "redoc.html",
                 "api-spec-viewer.html",
-                "xxx-api-1/openapi.yml",
-                "xxx-api-2/openapi.yml",
-                "xxx-api-3/openapi.yml"
+                "xxx-api-1/docs/paths/openapi.yml",
+                "xxx-api-1/docs/paths/subapi.yml",
+                "xxx-api-2/docs/paths/openapi.yml",
+                "xxx-api-2/docs/paths/subapi.yml",
+                "xxx-api-3/docs/paths/openapi.yml",
+                "xxx-api-3/docs/paths/subapi.yml"
             ]
             
             # 作成されたファイル一覧を表示
@@ -206,7 +193,7 @@ def run_test():
     
     finally:
         # 元の関数と設定を復元
-        collect_openapi.run_gh_command = original_run_gh_command
+        gh_utils.run_gh_command = original_run_gh_command
         restore_config()
 
 if __name__ == "__main__":

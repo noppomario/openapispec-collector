@@ -27,7 +27,6 @@ ENV/
 env/
 
 # テスト関連のファイル
-test/mock_data/
 test/output/
 test/static_site/
 .pytest_cache/

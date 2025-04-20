@@ -1,88 +1,53 @@
-# OpenAPI仕様書収集ツール
+# OpenAPI仕様書収集・静的サイト生成ツール
 
-GitHub上の複数リポジトリに分散したOpenAPI仕様書を収集し、一元的に閲覧できる静的サイトを生成するツール
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 
-## 使用方法
+
+GitHub上の複数リポジトリに分散したOpenAPI仕様書を収集し、一元的に閲覧できる静的サイトを生成するツールです。
+
+## 主な特徴
+- spec_path（例: docs/*.yml, docs/paths/*.yml など）で任意のパターンのOpenAPI仕様書を収集可能
+- 収集した仕様書を静的サイト（Swagger UI, ReDoc, 統合ビューア）として自動生成
+
+## 使い方
 
 ```bash
-# スクリプトを実行
-python collect_openapi.py
+# 仕様書の収集のみ
+python openapispec_cli.py collect
+
+# 収集済み仕様書から静的サイト生成のみ
+python openapispec_cli.py build
+
+# 収集＋静的サイト生成＋統合ビューア生成
+python openapispec_cli.py all
+
+# 統合ビューアのみ生成
+python openapispec_cli.py viewer
+
+# クリーンアップ
+python openapispec_cli.py clean
 ```
 
-実行すると以下の処理が行われます：
+## 設定例
 
-1. 指定された組織/ユーザーから対象のリポジトリを検索
-2. 各リポジトリからOpenAPI仕様書を取得し、`static_site/`ディレクトリに静的サイトを生成
-3. スタンドアローン版のビューアーも同時に生成 (`static_site/api-spec-viewer.html`)
-
-生成された静的サイトは、`static_site/index.html`を開くことで閲覧できます。
-また、`static_site/api-spec-viewer.html`を開くことで、オフラインでも利用可能なスタンドアローン版を利用できます。
-
-## 閲覧方法
-
-生成された静的サイトでは、以下の2つのビューアーを利用できます：
-
-- Swagger UI: OpenAPI仕様書の対話的なドキュメントを表示
-- ReDoc: 読みやすく整形されたドキュメントを表示
-
-スタンドアローン版では以下の機能も利用できます：
-
-- 全API横断検索
-- レスポンシブデザイン
-- オフライン対応（すべてのリソースを1ファイルに統合）
-
-## ファイルの違い
-
-- `index.html`: 基本となるビューアー（外部リソースを参照）
-- `api-spec-viewer.html`: すべてのリソースを1ファイルにバンドルしたスタンドアローン版
-
-## 設定
-
-`config.py`で以下の設定を変更できます：
+`src/config.py` で以下のように設定します:
 
 ```python
 CONFIG = {
-    # GitHubの組織名または所有者名
     "organization": "xxx-project",
-    
-    # 対象リポジトリのパターン
     "repo_pattern": "xxx-api",
-    
-    # 取得するリポジトリの上限
     "repo_limit": 100,
-    
-    # OpenAPI仕様書の相対パス
-    "spec_path": "docs/openapi.yml",
-    
-    # 静的サイトの出力先ディレクトリ
+    "spec_path": "docs/paths/*.yml",  # 任意のパターンに変更可能
     "static_site_dir": "static_site",
 }
 ```
 
-## コマンドライン引数
+## 静的サイトの閲覧
 
-以下のコマンドライン引数が利用可能です：
-
-- `clean`: 出力ディレクトリをクリーンアップ
-- `viewer`: スタンドアローン版ビューアーのみを生成
-
-## テスト
-
-このプロジェクトにはテスト環境が含まれています。テストを実行するには：
-
-```bash
-# テスト実行
-python -m test.test_collect_openapi
-
-# サーバ起動
-cd static_site
-python -m http.server 8000
-```
+- 生成された `static_site/index.html` をブラウザで開くと、全API仕様書を横断的に閲覧できます。
+- `static_site/api-spec-viewer.html` はオフラインでも利用可能なスタンドアローンビューアです。
 
 ## ライセンス
 
-MIT
-
-## 貢献
-
-プルリクエストは歓迎します。大きな変更を行う場合は、まず問題を報告してください。
+This software is released under the [MIT License](LICENSE).

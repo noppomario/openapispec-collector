@@ -1,0 +1,11 @@
+openapi: 3.0.0
+info:
+  title: xxx-api-2 main
+  version: 1.0.0
+paths:
+  /ping:
+    get:
+      summary: Ping endpoint
+      responses:
+        '200':
+          description: Pong

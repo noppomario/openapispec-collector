@@ -12,7 +12,7 @@ CONFIG = {
     "repo_limit": 100,
     
     # OpenAPI仕様書の相対パス
-    "spec_path": "docs/openapi.yml",
+    "spec_path": "docs/paths/*.yml",
     
     # 静的サイトの出力先ディレクトリ
     "static_site_dir": "static_site",
