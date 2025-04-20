@@ -292,71 +292,53 @@ iframe {
     margin-top: 5px;
 }
 
-/* API一覧アイテム */
+/* APIリスト密度高め・小型化 */
+.repo-header {
+    font-size: 0.98em;
+    padding: 2px 0 2px 2px;
+    margin-bottom: 2px;
+}
+.repo-toggle {
+    font-size: 0.95em;
+    width: 1em;
+}
+.repo-title {
+    font-size: 1em;
+}
+.repo-api-list {
+    margin-left: 8px;
+}
 .api-list-item {
-    transition: all 0.2s ease-in-out;
-    border-left: 4px solid transparent;
-    padding: 15px;
-    margin-bottom: 8px;
+    padding: 7px 10px;
+    margin-bottom: 4px;
+    font-size: 0.97em;
+    border-radius: 3px;
 }
-
-.api-list-item:hover {
-    border-left-color: #007bff;
-    background-color: #f8f9fa;
-    transform: translateX(2px);
+.api-list-item h5 {
+    font-size: 1em;
+    margin-bottom: 2px;
 }
-
 .api-description {
-    color: #666;
-    font-size: 0.9em;
-    margin-bottom: 10px;
+    font-size: 0.85em;
+    margin-bottom: 4px;
 }
-
 .button-group {
-    opacity: 0.8;
-    transition: opacity 0.2s ease-in-out;
+    gap: 4px;
 }
-
-.api-list-item:hover .button-group {
-    opacity: 1;
+.button-group .btn {
+    font-size: 0.85em;
+    padding: 2px 8px;
+    min-width: 60px;
+    height: 24px;
+    line-height: 1.1;
 }
-
-/* レスポンシブ対応 */
 @media (max-width: 768px) {
-    .app-container {
-        flex-direction: column;
-    }
-    
-    .sidebar {
-        width: 100%;
-        max-height: 30vh;
-    }
-
     .api-list-item {
-        padding: 10px;
+        padding: 6px 6px;
     }
-    
-    .button-group {
-        display: flex;
-        gap: 8px;
-        opacity: 1;
-    }
-    
     .button-group .btn {
-        flex: 1;
+        min-width: 40px;
+        font-size: 0.8em;
+        padding: 2px 4px;
     }
-}
-
-/* ウェルカム画面のスタイル */
-.welcome-message h1 {
-    font-size: 2.2rem;
-    color: #333;
-    margin-bottom: 1.5rem;
-}
-
-.welcome-text {
-    font-size: 1rem;
-    color: #666;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
 }

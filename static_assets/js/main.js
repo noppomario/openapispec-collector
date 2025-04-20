@@ -94,66 +94,95 @@ document.addEventListener('DOMContentLoaded', function() {
 // APIリストを初期化
 function initializeApiList() {
     const apiList = document.getElementById('api-list');
-    
+    apiList.innerHTML = '';
+
+    // 1. リポジトリごとにAPI仕様書をグループ化
+    const repoMap = {};
     for (const [specPath, specData] of Object.entries(window.apiSpecs)) {
         const repoName = specPath.split('/')[0];
-        const title = specData?.info?.title || repoName;
-        
-        const listItem = document.createElement('div');
-        listItem.className = 'list-group-item api-list-item';
-        
-        // クリック可能な領域として実装
-        listItem.style.cursor = 'pointer';
-        
-        const heading = document.createElement('h5');
-        heading.className = 'mb-2';
-        heading.textContent = title;
-        listItem.appendChild(heading);
-        
-        const repoInfo = document.createElement('p');
-        repoInfo.className = 'mb-2';
-        repoInfo.textContent = `Repository: ${repoName}`;
-        listItem.appendChild(repoInfo);
-        
-        // 説明文があれば表示
-        if (specData?.info?.description) {
-            const description = document.createElement('p');
-            description.className = 'api-description mb-2';
-            description.textContent = specData.info.description.substring(0, 150) + 
-                (specData.info.description.length > 150 ? '...' : '');
-            listItem.appendChild(description);
-        }
-        
-        const buttonGroup = document.createElement('div');
-        buttonGroup.className = 'button-group';
-        
-        const swaggerButton = document.createElement('button');
-        swaggerButton.className = 'btn btn-primary btn-sm me-2';
-        swaggerButton.textContent = 'Swagger UI';
-        swaggerButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showSpec(specPath, 'swagger', title, window.apiSpecs);
-        });
-        buttonGroup.appendChild(swaggerButton);
-        
-        const redocButton = document.createElement('button');
-        redocButton.className = 'btn btn-success btn-sm';
-        redocButton.textContent = 'ReDoc';
-        redocButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showSpec(specPath, 'redoc', title, window.apiSpecs);
-        });
-        buttonGroup.appendChild(redocButton);
-        
-        listItem.appendChild(buttonGroup);
-        
-        // リストアイテム全体のクリックでSwagger UIを表示
-        listItem.addEventListener('click', () => {
-            showSpec(specPath, 'swagger', title, window.apiSpecs);
-        });
-        
-        apiList.appendChild(listItem);
+        if (!repoMap[repoName]) repoMap[repoName] = [];
+        repoMap[repoName].push({ specPath, specData });
     }
+
+    // 2. 各リポジトリごとに親要素＋子リストを作成
+    Object.keys(repoMap).sort().forEach(repoName => {
+        // リポジトリ見出し
+        const repoSection = document.createElement('div');
+        repoSection.className = 'repo-section';
+
+        // 見出し＋トグル
+        const header = document.createElement('div');
+        header.className = 'repo-header';
+        header.style.cursor = 'pointer';
+        header.innerHTML = `<span class="repo-toggle">▼</span> <span class="repo-title">${repoName}</span>`;
+        repoSection.appendChild(header);
+
+        // 子リスト
+        const childList = document.createElement('div');
+        childList.className = 'repo-api-list';
+
+        repoMap[repoName].forEach(({ specPath, specData }) => {
+            const title = specData?.info?.title || specPath;
+            const listItem = document.createElement('div');
+            listItem.className = 'list-group-item api-list-item';
+            listItem.style.cursor = 'pointer';
+
+            const heading = document.createElement('h5');
+            heading.className = 'mb-2';
+            heading.textContent = title;
+            listItem.appendChild(heading);
+
+            // 説明文
+            if (specData?.info?.description) {
+                const description = document.createElement('p');
+                description.className = 'api-description mb-2';
+                description.textContent = specData.info.description.substring(0, 150) +
+                    (specData.info.description.length > 150 ? '...' : '');
+                listItem.appendChild(description);
+            }
+
+            // ボタン群
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'button-group';
+
+            const swaggerButton = document.createElement('button');
+            swaggerButton.className = 'btn btn-primary btn-sm me-2';
+            swaggerButton.textContent = 'Swagger UI';
+            swaggerButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSpec(specPath, 'swagger', title, window.apiSpecs);
+            });
+            buttonGroup.appendChild(swaggerButton);
+
+            const redocButton = document.createElement('button');
+            redocButton.className = 'btn btn-success btn-sm';
+            redocButton.textContent = 'ReDoc';
+            redocButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSpec(specPath, 'redoc', title, window.apiSpecs);
+            });
+            buttonGroup.appendChild(redocButton);
+
+            listItem.appendChild(buttonGroup);
+
+            // 全体クリックでSwagger UI
+            listItem.addEventListener('click', () => {
+                showSpec(specPath, 'swagger', title, window.apiSpecs);
+            });
+
+            childList.appendChild(listItem);
+        });
+
+        repoSection.appendChild(childList);
+        apiList.appendChild(repoSection);
+
+        // トグル動作
+        header.addEventListener('click', () => {
+            const isOpen = childList.style.display !== 'none';
+            childList.style.display = isOpen ? 'none' : '';
+            header.querySelector('.repo-toggle').textContent = isOpen ? '▶' : '▼';
+        });
+    });
 }
 
 // Base64文字列をデコードする関数
