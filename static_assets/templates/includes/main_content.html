@@ -11,7 +11,13 @@
     <div class="viewer-header">
         <button class="back-button" id="back-to-list">戻る</button>
         <div class="spec-title" id="current-spec-title">API仕様書</div>
-        <div class="viewer-type" id="current-viewer-type">表示方法: -</div>
+        <div class="viewer-type" style="display: flex; align-items: center; gap: 8px;">
+            <span class="form-label mb-0" style="font-size:0.97em;">表示方法:</span>
+            <div class="btn-group" role="group" aria-label="Viewer mode toggle">
+                <button type="button" class="btn btn-outline-secondary" id="toggle-swagger">Swagger UI</button>
+                <button type="button" class="btn btn-outline-secondary" id="toggle-redoc">ReDoc</button>
+            </div>
+        </div>
     </div>
     <!-- SwaggerUIコンテナ -->
     <div id="swagger-ui" class="hidden"></div>

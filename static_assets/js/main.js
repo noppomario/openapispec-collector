@@ -89,6 +89,56 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // API一覧を初期化
     initializeApiList();
+
+    // 表示方法ドロップダウンのイベントを追加
+    const viewerModeSelect = document.getElementById('viewer-mode-select');
+    if (viewerModeSelect) {
+        // 初期値
+        appState.currentViewType = viewerModeSelect.value;
+        viewerModeSelect.addEventListener('change', function(e) {
+            appState.currentViewType = viewerModeSelect.value;
+            // すでにAPIが表示されていれば切り替え
+            if (appState.currentSpecPath) {
+                showSpec(appState.currentSpecPath, appState.currentViewType, appState.currentSpecTitle, window.apiSpecs);
+            }
+        });
+    }
+
+    // トグルボタンのイベント設定
+    const toggleSwagger = document.getElementById('toggle-swagger');
+    const toggleRedoc = document.getElementById('toggle-redoc');
+    function updateViewerToggleUI() {
+        if (appState.currentViewType === 'redoc') {
+            toggleSwagger.classList.remove('active');
+            toggleRedoc.classList.add('active');
+        } else {
+            toggleSwagger.classList.add('active');
+            toggleRedoc.classList.remove('active');
+        }
+    }
+    if (toggleSwagger && toggleRedoc) {
+        // 初期状態
+        appState.currentViewType = 'swagger';
+        updateViewerToggleUI();
+        toggleSwagger.addEventListener('click', function() {
+            if (appState.currentViewType !== 'swagger') {
+                appState.currentViewType = 'swagger';
+                updateViewerToggleUI();
+                if (appState.currentSpecPath) {
+                    showSpec(appState.currentSpecPath, 'swagger', appState.currentSpecTitle, window.apiSpecs);
+                }
+            }
+        });
+        toggleRedoc.addEventListener('click', function() {
+            if (appState.currentViewType !== 'redoc') {
+                appState.currentViewType = 'redoc';
+                updateViewerToggleUI();
+                if (appState.currentSpecPath) {
+                    showSpec(appState.currentSpecPath, 'redoc', appState.currentSpecTitle, window.apiSpecs);
+                }
+            }
+        });
+    }
 });
 
 // APIリストを初期化
@@ -141,33 +191,10 @@ function initializeApiList() {
                 listItem.appendChild(description);
             }
 
-            // ボタン群
-            const buttonGroup = document.createElement('div');
-            buttonGroup.className = 'button-group';
-
-            const swaggerButton = document.createElement('button');
-            swaggerButton.className = 'btn btn-primary btn-sm me-2';
-            swaggerButton.textContent = 'Swagger UI';
-            swaggerButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showSpec(specPath, 'swagger', title, window.apiSpecs);
-            });
-            buttonGroup.appendChild(swaggerButton);
-
-            const redocButton = document.createElement('button');
-            redocButton.className = 'btn btn-success btn-sm';
-            redocButton.textContent = 'ReDoc';
-            redocButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showSpec(specPath, 'redoc', title, window.apiSpecs);
-            });
-            buttonGroup.appendChild(redocButton);
-
-            listItem.appendChild(buttonGroup);
-
-            // 全体クリックでSwagger UI
+            // API名クリックで現在の表示方法で開く
             listItem.addEventListener('click', () => {
-                showSpec(specPath, 'swagger', title, window.apiSpecs);
+                const viewerMode = appState.currentViewType || 'swagger';
+                showSpec(specPath, viewerMode, title, window.apiSpecs);
             });
 
             childList.appendChild(listItem);

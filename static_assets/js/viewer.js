@@ -4,22 +4,22 @@
 
 // SwaggerUIまたはReDocで仕様書を表示
 function showSpec(specPath, viewerType, title, apiSpecs) {
+    console.log('showSpec呼び出し', specPath, viewerType, title);
     // 状態を更新
     appState.currentSpecPath = specPath;
     appState.currentViewType = viewerType;
     appState.currentSpecTitle = title;
-    
-    // UI要素の参照を取得
+    // UI要素の参照
     const welcomeScreen = document.getElementById('welcome-screen');
     const viewerContainer = document.getElementById('viewer-container');
     const swaggerUI = document.getElementById('swagger-ui');
     const redocFrame = document.getElementById('redoc-frame');
     const currentSpecTitle = document.getElementById('current-spec-title');
-    const currentViewerType = document.getElementById('current-viewer-type');
-    
-    // タイトルと表示タイプを更新
+    //const currentViewerType = document.getElementById('current-viewer-type');
+    // タイトルのみ更新
     currentSpecTitle.textContent = title || 'API仕様書';
-    currentViewerType.textContent = `表示方法: ${viewerType === 'swagger' ? 'Swagger UI' : 'ReDoc'}`;
+    // 表示方法テキストの更新は不要（ドロップダウンで管理）
+    // currentViewerType.textContent = `表示方法: ${viewerType === 'swagger' ? 'Swagger UI' : 'ReDoc'}`;
     
     // 基本的なUI表示制御
     welcomeScreen.classList.add('hidden');
